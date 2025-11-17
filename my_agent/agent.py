@@ -1,20 +1,21 @@
 import json
 from google.adk.agents import LlmAgent
-
 from google.adk.agents.remote_a2a_agent import AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 
 from constraints import CONSTRAINTS
 
-reference_agent = RemoteA2aAgent(
-    name="reference_agent",
-    description="Agent that receives a text or a bibtex and returns if the references are valid.",
-    agent_card=(
-        f"http://localhost:8081{AGENT_CARD_WELL_KNOWN_PATH}"
-    ),
+
+# Criar o agente remoto com o URL correto
+validate_references = RemoteA2aAgent(
+    name="reference_validator",
+    description="Agent to check the validity of references in academic texts.",
+    agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}"
 )
 
+
 def policy_validator(plan_json: dict) -> dict:
+    """Validate plan against policy constraints."""
     return f'CONSTRAINTS = {CONSTRAINTS}'
 
 
@@ -23,7 +24,7 @@ You are a governance agent responsible for evaluating either plans (JSON format)
 or academic executions (plain text).
 
 Step 1. Detect the input type.
-  - Try to parse as JSON. If successful, it’s a planning input.
+  - Try to parse as JSON. If successful, it's a planning input.
   - If parsing fails, treat as plain text (execution input).
 
 Step 2. If planning:
@@ -39,7 +40,7 @@ Step 2. If planning:
     }
 
 Step 3. If execution:
-  - Verify that references are present and plausible using `reference_agent`.
+  - Verify if the text contains references and if they are present and plausible calling the subagent `validate_references`.
   - Optionally verify writing coherence.
   - Verify if there is some personal identifiable information (PII) in the text, if exists it is not valid.
   - Return:
@@ -56,9 +57,6 @@ root_agent = LlmAgent(
     model="gemini-2.0-flash",
     description="Agent that performs governance checks on planning (JSON) or execution (academic text).",
     instruction=INSTRUCTION,
-    sub_agents=[reference_agent],
+    sub_agents=[validate_references],
     tools=[policy_validator],
 )
-
-#adk run my_agent
-
