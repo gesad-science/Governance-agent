@@ -1,1 +1,1 @@
-CONSTRAINTS = []
+CONSTRAINTS = ['Plans must be a json']

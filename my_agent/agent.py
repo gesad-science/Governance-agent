@@ -6,7 +6,6 @@ from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from constraints import CONSTRAINTS
 
 
-# Criar o agente remoto com o URL correto
 validate_references = RemoteA2aAgent(
     name="reference_validator",
     description="Agent to check the validity of references in academic texts.",
@@ -14,8 +13,7 @@ validate_references = RemoteA2aAgent(
 )
 
 
-def policy_validator(plan_json: dict) -> dict:
-    """Validate plan against policy constraints."""
+def policy_validator() -> str:
     return f'CONSTRAINTS = {CONSTRAINTS}'
 
 
